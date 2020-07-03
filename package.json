@@ -2,30 +2,38 @@
   "name": "pm-cli",
   "version": "0.0.1",
   "author": {
-    "name": "Daniel Sanchez", 
+    "name": "Daniel Sanchez",
     "email": "daniel@gnosis.pm"
   },
   "bin": {
     "pm-cli": "./bin/run"
   },
-  "bugs": "https://github.com/dasanra/pm-cli/issues",
+  "bugs": "https://gitlab.gnosisdev.com/daniel/pm-liquidity-incentive-cli/issues",
   "dependencies": {
+    "@gnosis.pm/conditional-tokens-market-makers": "^1.8.1",
     "@oclif/command": "^1",
     "@oclif/config": "^1",
-    "@oclif/plugin-help": "^3"
+    "@oclif/plugin-help": "^3",
+    "@truffle/contract": "^4.2.11",
+    "dotenv": "^8.2.0",
+    "web3": "^1.2.9"
   },
   "devDependencies": {
     "@oclif/dev-cli": "^1",
     "@oclif/test": "^1",
     "chai": "^4",
-    "eslint": "^5.13",
+    "eslint": "^7.3.1",
     "eslint-config-oclif": "^3.1",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
     "globby": "^10",
-    "mocha": "^5",
+    "mocha": "^8.0.1",
     "nyc": "^14"
   },
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=10.0.0"
   },
   "files": [
     "/bin",
@@ -33,7 +41,7 @@
     "/oclif.manifest.json",
     "/src"
   ],
-  "homepage": "https://github.com/dasanra/pm-cli",
+  "homepage": "https://gitlab.gnosisdev.com/daniel/pm-liquidity-incentive-cli",
   "keywords": [
     "oclif"
   ],
@@ -46,7 +54,7 @@
       "@oclif/plugin-help"
     ]
   },
-  "repository": "dasanra/pm-cli",
+  "repository": "daniel/pm-liquidity-incentive-cli",
   "scripts": {
     "postpack": "rm -f oclif.manifest.json",
     "posttest": "eslint .",

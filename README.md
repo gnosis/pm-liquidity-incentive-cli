@@ -47,7 +47,25 @@ DESCRIPTION
   Extra documentation goes here
 ```
 
-_See code: [src/commands/hello.js](https://github.com/dasanra/pm-cli/blob/v0.0.0/src/commands/hello.js)_
+_See code: [src/commands/hello.js](https://github.com/dasanra/pm-cli/blob/v0.0.1/src/commands/hello.js)_
+
+## `pm-cli get-funding-events`
+
+Describe the command here
+
+```
+USAGE
+  $ pm-cli hello
+
+OPTIONS
+  -m, --market=maketAddress  market address to search for events
+
+DESCRIPTION
+  ...
+  Extra documentation goes here
+```
+
+_See code: [src/commands/get-funding-events.js](https://github.com/dasanra/pm-cli/blob/v0.0.1/src/commands/get-funding-events.js)_
 
 ## `pm-cli help [COMMAND]`
 
