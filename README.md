@@ -28,26 +28,8 @@ USAGE
 <!-- usagestop -->
 # Commands
 <!-- commands -->
-* [`pm-cli hello`](#pm-cli-hello)
+* [`pm-cli get-funding-events`](#pm-cli-get-funding-events)
 * [`pm-cli help [COMMAND]`](#pm-cli-help-command)
-
-## `pm-cli hello`
-
-Describe the command here
-
-```
-USAGE
-  $ pm-cli hello
-
-OPTIONS
-  -n, --name=name  name to print
-
-DESCRIPTION
-  ...
-  Extra documentation goes here
-```
-
-_See code: [src/commands/hello.js](https://github.com/dasanra/pm-cli/blob/v0.0.1/src/commands/hello.js)_
 
 ## `pm-cli get-funding-events`
 
@@ -55,7 +37,7 @@ Describe the command here
 
 ```
 USAGE
-  $ pm-cli hello
+  $ pm-cli get-funding-events
 
 OPTIONS
   -m, --market=maketAddress  market address to search for events

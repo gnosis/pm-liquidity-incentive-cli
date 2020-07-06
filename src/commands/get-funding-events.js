@@ -1,7 +1,13 @@
 const { Command, flags } = require('@oclif/command')
 const { cli } = require('cli-ux')
 const { getWeb3, toBN } = require('../utils/web3')
+const { parseDateIso } = require('../utils/date')
+const { getLastBlockBeforeDate } = require('../utils/block')
 const { getContracts } = require('../contracts')
+
+// Aproximately calculate first block to be 1 month ago
+const DEFAULT_DAILY_BLOCK_AMOUNT = 6500
+const DEFAULT_DAYS_FROM_NOW = 30
 
 class GetFundingEventsCommand extends Command {
   static flags = {
@@ -11,7 +17,8 @@ class GetFundingEventsCommand extends Command {
   async run () {
     const { flags } = this.parse(GetFundingEventsCommand)
     const market = flags.market
-    const fromDate = flags.fromDate
+    const fromDateStr = flags.fromDate
+    const toDateStr = flags.toDate
     this.log(`Get funding events for ${market}`)
 
     const [contracts, web3] = await Promise.all([
@@ -28,8 +35,21 @@ class GetFundingEventsCommand extends Command {
     const lastBlockNumber = await web3.eth.getBlock('latest').then(block => {
       return block.number
     })
-    // Aproximately calculate first block to be 1.5 months ago
-    const fromBlockNumber = lastBlockNumber - (6500 * 45)
+    let lastBlockBeforeDate = null
+    if (fromDateStr) {
+      // If a from date was specified
+      const fromDate = parseDateIso(fromDateStr)
+      lastBlockBeforeDate = await getLastBlockBeforeDate(fromDate)
+    }
+    const fromBlockNumber = lastBlockBeforeDate || lastBlockNumber - (DEFAULT_DAILY_BLOCK_AMOUNT * DEFAULT_DAYS_FROM_NOW)
+
+    let toBlockAfterDate = null
+    if (toDateStr) {
+      // If a to date was specified
+      const toDate = parseDateIso(toDateStr)
+      toBlockAfterDate = await getLastBlockBeforeDate(toDate)
+    }
+    const toBlockNumber = toBlockAfterDate || 'latest'
 
     const eventNames = ['FPMMFundingAdded', 'FPMMFundingRemoved']
     // Get all funding events
@@ -37,7 +57,7 @@ class GetFundingEventsCommand extends Command {
       eventNames.map(eventName => {
         return marketMakerInstance.getPastEvents(eventName, {
           fromBlock: fromBlockNumber,
-          toBlock: 'latest'
+          toBlock: toBlockNumber
         })
       })
     )
