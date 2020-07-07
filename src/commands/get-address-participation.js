@@ -61,25 +61,23 @@ class GetAddressParticipationCommand extends Command {
     /********************* TODO extract getFundingOverTime to an util  **********************/
     const getFundingOverTime = events => {
       const fundingData = events.reduce((acc, { event, timestamp, returnValues }, index) => {
-        let liquidityPeriodInDays
         if (event === 'FPMMFundingAdded') {
           acc.ownedShares = acc.ownedShares.add(toBN(returnValues.sharesMinted))
         } else {
           acc.ownedShares = acc.ownedShares.sub(toBN(returnValues.sharesBurnt))
         }
-
+        let liquidityPeriodInDays
         if (events[index + 1]) {
           liquidityPeriodInDays = (events[index + 1].timestamp - timestamp) / 86400
-          acc.shareProportion = acc.ownedShares * liquidityPeriodInDays
         } else {
           liquidityPeriodInDays = ((lastDate.valueOf() / 1000) - timestamp) / 86400
-          acc.shareProportion = acc.ownedShares * liquidityPeriodInDays
         }
-
+        acc.shareProportion = acc.shareProportion + (acc.ownedShares * liquidityPeriodInDays)
+        
         return acc
       }, {
         ownedShares: toBN(0),
-        shareProportion: toBN(0)
+        shareProportion: 0
       })
 
       return fundingData
@@ -118,7 +116,7 @@ class GetAddressParticipationCommand extends Command {
         get: address => address
       },
       ownedShares: {
-        header: 'Owned Shares',
+        header: 'Current Owned Shares',
         get: address => fundingOverTimeByAddress[address].ownedShares.toString()
       },
       fundingPercentage: {
