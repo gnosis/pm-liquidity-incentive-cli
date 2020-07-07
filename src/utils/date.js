@@ -1,8 +1,14 @@
 const moment = require('moment')
 
-const DATE_FORMAT = 'D/MM/YY'
+const DATE_FORMAT = 'Do MMM YYYY'
 const TIME_FORMAT = 'H:mm'
 const DATE_TIME_FORMAT = DATE_FORMAT + ' ' + TIME_FORMAT
+
+function substractPeriod (date, amount, period) {
+  return moment(date)
+    .subtract(amount, period)
+    .toDate()
+}
 
 function formatDateTime (date) {
   return date ? moment(date).format(DATE_TIME_FORMAT) : null
@@ -35,6 +41,7 @@ function diff (date1, date2, period) {
 }
 
 module.exports = {
+  substractPeriod,
   formatDateTime,
   parseDateIso,
   diff

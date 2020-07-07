@@ -1,11 +1,11 @@
 const { Command, flags } = require('@oclif/command')
 const { cli } = require('cli-ux')
 const { getWeb3, toBN } = require('../utils/web3')
-const { parseDateIso } = require('../utils/date')
+const { parseDateIso, substractPeriod, formatDateTime } = require('../utils/date')
 const { getLastBlockBeforeDate } = require('../utils/block')
 const { getAllFundingEvents } = require('../api/market-maker')
 
-// Aproximately calculate first block to be 1 month ago
+// If fromDate is not defined, aproximately calculate first block to be 1 month ago
 const DEFAULT_DAILY_BLOCK_AMOUNT = 6500
 const DEFAULT_DAYS_FROM_NOW = 30
 
@@ -19,8 +19,18 @@ class GetAddressParticipationCommand extends Command {
     const market = flags.market
     const fromDateStr = flags.fromDate
     const toDateStr = flags.toDate
-    this.log(`Get address participation for ${market}`)
+    const reward = flags.reward || 0
+    
+    const fromDate = fromDateStr
+    ? parseDateIso(fromDateStr)
+    : substractPeriod(new Date(), DEFAULT_DAYS_FROM_NOW, 'days')
 
+    const toDate = toDateStr
+    ? parseDateIso(toDateStr)
+    : new Date()
+    
+    this.log(`Get address participation for ${market} from ${formatDateTime(fromDate)} until ${formatDateTime(toDate)}`)
+    
     const web3 = await getWeb3()
    
     // Get last block number
@@ -30,7 +40,6 @@ class GetAddressParticipationCommand extends Command {
     let lastBlockBeforeDate = null
     if (fromDateStr) {
       // If a from date was specified
-      const fromDate = parseDateIso(fromDateStr)
       lastBlockBeforeDate = await getLastBlockBeforeDate(fromDate)
     }
     const fromBlockNumber = lastBlockBeforeDate || lastBlockNumber - (DEFAULT_DAILY_BLOCK_AMOUNT * DEFAULT_DAYS_FROM_NOW)
@@ -38,7 +47,6 @@ class GetAddressParticipationCommand extends Command {
     let toBlockAfterDate = null
     if (toDateStr) {
       // If a to date was specified
-      const toDate = parseDateIso(toDateStr)
       toBlockAfterDate = await getLastBlockBeforeDate(toDate)
     }
     const toBlockNumber = toBlockAfterDate || 'latest'
@@ -56,22 +64,24 @@ class GetAddressParticipationCommand extends Command {
       return acc
     }, {})
 
-    const lastDate = new Date()
     // Funtion to calc funding over time
     /********************* TODO extract getFundingOverTime to an util  **********************/
     const getFundingOverTime = events => {
       const fundingData = events.reduce((acc, { event, timestamp, returnValues }, index) => {
-        if (event === 'FPMMFundingAdded') {
-          acc.ownedShares = acc.ownedShares.add(toBN(returnValues.sharesMinted))
-        } else {
-          acc.ownedShares = acc.ownedShares.sub(toBN(returnValues.sharesBurnt))
-        }
+        // Add or remove current user shares
+        event === 'FPMMFundingAdded'
+          ? acc.ownedShares = acc.ownedShares.add(toBN(returnValues.sharesMinted))
+          : acc.ownedShares = acc.ownedShares.sub(toBN(returnValues.sharesBurnt))
+
         let liquidityPeriodInDays
         if (events[index + 1]) {
+          // There are more funding events, we will consider this period until next event
           liquidityPeriodInDays = (events[index + 1].timestamp - timestamp) / 86400
         } else {
-          liquidityPeriodInDays = ((lastDate.valueOf() / 1000) - timestamp) / 86400
+          // Last funding event, we will consider this period of liquidity until last day
+          liquidityPeriodInDays = ((toDate.valueOf() / 1000) - timestamp) / 86400
         }
+        // We multiply shares for the time period to get a participation proportion
         acc.shareProportion = acc.shareProportion + (acc.ownedShares * liquidityPeriodInDays)
         
         return acc
@@ -97,7 +107,6 @@ class GetAddressParticipationCommand extends Command {
       acc[address] = {
         ownedShares: userFundingStats.ownedShares,
         shareProportion: userFundingStats.shareProportion,
-        // fundingPercentage: userFundingStats.shareProportion / totalFunding.shareProportion * 100
       }
 
       return acc
@@ -111,6 +120,7 @@ class GetAddressParticipationCommand extends Command {
     }, 0)
 
     // Print table showing current shares and provision percentage by address
+    // Show token reward
     cli.table(addressList, {
       address: {
         get: address => address
@@ -122,6 +132,10 @@ class GetAddressParticipationCommand extends Command {
       fundingPercentage: {
         header: 'Funding Percentage (%)',
         get: address => (fundingOverTimeByAddress[address].shareProportion / totalFundingProportion * 100)
+      },
+      reward: {
+        header: 'Reward',
+        get: address => (fundingOverTimeByAddress[address].shareProportion / totalFundingProportion * reward)
       }
     }, {
       printLine: this.log,
@@ -139,7 +153,8 @@ Extra documentation goes here
 GetAddressParticipationCommand.flags = {
   fromDate: flags.string({ char: '', description: 'date to start searching for events' }),
   toDate: flags.string({ char: '', description: 'date to stop searching for events' }),
-  market: flags.string({ char: 'm', description: 'market address to query for funding' })
+  market: flags.string({ char: 'm', description: 'market address to query for funding' }),
+  reward: flags.string({ char: 'r', description: 'Reward to split between participants providing liquidity to the market' })
 }
 
 module.exports = GetAddressParticipationCommand
