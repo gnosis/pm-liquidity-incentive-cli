@@ -29,11 +29,12 @@ USAGE
 # Commands
 <!-- commands -->
 * [`pm-cli get-funding-events`](#pm-cli-get-funding-events)
+* [`pm-cli get-address-participation`](#pm-cli-get-address-participation)
 * [`pm-cli help [COMMAND]`](#pm-cli-help-command)
 
 ## `pm-cli get-funding-events`
 
-Describe the command here
+Use this command to query for funding events in a selected market. It will show a table showing funding added or removed ordered by time. It can be filtered using a start and an end date.
 
 ```
 USAGE
@@ -41,6 +42,26 @@ USAGE
 
 OPTIONS
   -m, --market=maketAddress  market address to search for events
+  --fromDate=startDate  Date in which you would like to start to check for events
+  --toDate=endDate  Date to stop searching for events
+
+DESCRIPTION
+  ...
+  Extra documentation goes here
+```
+
+## `pm-cli get-address-participation`
+
+Use this command to get address participation in a market funding during a time frame
+
+```
+USAGE
+  $ pm-cli get-address-participation
+
+OPTIONS
+  -m, --market=maketAddress  market address to search for events
+  --fromDate=startDate  Date in which you would like to start to check for events
+  --toDate=endDate  Date to stop searching for events
 
 DESCRIPTION
   ...
