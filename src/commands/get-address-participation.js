@@ -1,5 +1,6 @@
 const { Command, flags } = require('@oclif/command')
 const { cli } = require('cli-ux')
+const fs = require('fs');
 const { getWeb3, toBN } = require('../utils/web3')
 const { parseDateIso, substractPeriod, formatDateTime } = require('../utils/date')
 const { getLastBlockBeforeDate } = require('../utils/block')
@@ -20,6 +21,7 @@ class GetAddressParticipationCommand extends Command {
     const fromDateStr = flags.fromDate
     const toDateStr = flags.toDate
     const reward = flags.reward || 0
+    const file = flags.file || false
     
     const fromDate = fromDateStr
     ? parseDateIso(fromDateStr)
@@ -146,15 +148,19 @@ class GetAddressParticipationCommand extends Command {
 }
 
 GetAddressParticipationCommand.description = `Get address participation in market funding
-...
-Extra documentation goes here
+Using this command will allow to calculate address participation in liquidity providing for the selected market.
+If a reward is provided as a liquidity incentive it will be automatically splitted proportionaly between addresses
+based on their participation.
+
+This command will only do the liquidity incentive calculation. Is up to the user to send the transactions manually.
 `
 
 GetAddressParticipationCommand.flags = {
   fromDate: flags.string({ char: '', description: 'date to start searching for events' }),
   toDate: flags.string({ char: '', description: 'date to stop searching for events' }),
-  market: flags.string({ char: 'm', description: 'market address to query for funding' }),
-  reward: flags.string({ char: 'r', description: 'Reward to split between participants providing liquidity to the market' })
+  market: flags.string({ char: 'm', description: 'market address to query' }),
+  reward: flags.string({ char: 'r', description: 'Reward to split between participants providing liquidity to the market' }),
+  file: flags.boolean({ char: 'f', description: 'Output data to a CSV file' })
 }
 
 module.exports = GetAddressParticipationCommand

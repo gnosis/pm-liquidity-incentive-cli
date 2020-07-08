@@ -66,8 +66,8 @@ class GetFundingEventsCommand extends Command {
 }
 
 GetFundingEventsCommand.description = `Get all funding events for a given market
-...
-Extra documentation goes here
+Returns a list of all the events in the given time period. If no time period is selected it will assume fromDate
+to be 1 month ago current date and toDate to be current date.
 `
 
 GetFundingEventsCommand.flags = {
