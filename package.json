@@ -16,7 +16,7 @@
     "@oclif/plugin-help": "^3",
     "@truffle/contract": "^4.2.11",
     "dotenv": "^8.2.0",
-    "moment": "^2.27.0",
+    "moment": "^2.29.4",
     "web3": "^1.2.9"
   },
   "devDependencies": {
